@@ -15,25 +15,22 @@ except Exception as e:
     exit()
 
 def route_length(route):
-    """Вычисление суммарной длины замкнутого маршрута"""
     return sum(dist_matrix[route[i], route[(i + 1) % N_CITIES]] for i in range(N_CITIES))
 
 
-# ===============================
 # 1. ГЕНЕТИЧЕСКИЙ АЛГОРИТМ (GA)
-# ===============================
 def genetic_algorithm(pop_size=100, gens=1000, mut_rate=0.15):
     population = [random.sample(range(N_CITIES), N_CITIES) for _ in range(pop_size)]
 
     for _ in range(gens):
         population.sort(key=route_length)
-        next_gen = population[:10]  # Элитизм: сохраняем 10 лучших
+        next_gen = population[:10]  #сохраняем 10 лучших
 
         while len(next_gen) < pop_size:
-            # Селекция (турнир)
+            # Селекция
             p1, p2 = random.choices(population[:50], k=2)
 
-            # Ordered Crossover (OX) - сохраняет структуру перестановки
+            # сохраняет структуру перестановки
             start, end = sorted(random.sample(range(N_CITIES), 2))
             child = [-1] * N_CITIES
             child[start:end] = p1[start:end]
@@ -51,9 +48,7 @@ def genetic_algorithm(pop_size=100, gens=1000, mut_rate=0.15):
     return best, route_length(best)
 
 
-# ===============================
 # 2. МУРАВЬИНЫЙ АЛГОРИТМ (ACO)
-# ===============================
 def ant_colony(ants=30, iters=100, alpha=1, beta=2.5, rho=0.1):
     pheromone = np.ones((N_CITIES, N_CITIES))
     best_route = None
@@ -92,9 +87,7 @@ def ant_colony(ants=30, iters=100, alpha=1, beta=2.5, rho=0.1):
     return best_route, best_len
 
 
-# ===============================
 # 3. ИМИТАЦИЯ ОТЖИГА (SA)
-# ===============================
 def simulated_annealing(t_init=5000, t_min=0.1, cooling_rate=0.995):
     curr_route = list(range(N_CITIES))
     random.shuffle(curr_route)
@@ -105,7 +98,7 @@ def simulated_annealing(t_init=5000, t_min=0.1, cooling_rate=0.995):
 
     while T > t_min:
         new_route = curr_route[:]
-        # 2-opt мутация: инверсия сегмента
+        # 2-opt мутация
         i, j = sorted(random.sample(range(N_CITIES), 2))
         new_route[i:j] = reversed(new_route[i:j])
         new_len = route_length(new_route)
@@ -119,12 +112,7 @@ def simulated_annealing(t_init=5000, t_min=0.1, cooling_rate=0.995):
 
     return best_route, best_len
 
-
-# ===============================
-# ЗАПУСК ТЕСТОВ
-# ===============================
 if __name__ == "__main__":
-    print("-" * 30)
     print("Результаты работы алгоритмов:")
 
     # 1. GA
@@ -138,5 +126,3 @@ if __name__ == "__main__":
     # 3. SA
     r_sa, l_sa = simulated_annealing()
     print(f"3. Алгоритм отжига:        Длина = {l_sa}")
-    print("-" * 30)
-    print(f"Точный оптимум (для справки): 1899")
